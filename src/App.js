@@ -1,25 +1,59 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import Movie from "./components/Movie";
 
-function App() {
+const FEATURED_API =
+  "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=3c1f2436ae10cf1d6939db98c9f94c10";
+
+const SEARCH_API =
+  "https://api.themoviedb.org/3/search/movie?api_key=3c1f2436ae10cf1d6939db98c9f94c10&query=";
+
+const App = () => {
+  const [movies, setMovies] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    getMovies(FEATURED_API);
+  }, []);
+
+  const getMovies = (API) => {
+    fetch(API)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setMovies(data.results);
+      });
+  };
+  const handleOnSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm) {
+      getMovies(SEARCH_API + searchTerm);
+      setSearchTerm("");
+    }
+  };
+
+  const handleOnChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  // {...movie} - setMovies sets data.results to movie in state and we pass movie to Movie component
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <form onSubmit={handleOnSubmit}>
+        <header>
+          <input
+            className="search"
+            type="search"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={handleOnChange}
+          />
+        </header>
+      </form>
+      <div className="movie-container">
+        {movies.length > 0 &&
+          movies.map((movie) => <Movie key={movie.id} {...movie} />)}
+      </div>
+    </>
   );
-}
+};
 
 export default App;
